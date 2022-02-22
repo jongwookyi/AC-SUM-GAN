@@ -14,9 +14,9 @@ from layers.actor_critic import Actor, Critic
 from fragments import calculate_fragments
 
 # labels for training the GAN part of the model
-original_label = torch.tensor(1.0).cuda()
-summary_label = torch.tensor(0.0).cuda()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+original_label = torch.tensor(1.0).to(device)
+summary_label = torch.tensor(0.0).to(device)
 
 def compute_returns(next_value, rewards, masks, gamma=0.99):
     """ Function that computes the return z_i following the equation (6) of the paper"""
@@ -39,21 +39,21 @@ class Solver(object):
         # Build Modules
         self.linear_compress = nn.Linear(
             self.config.input_size,
-            self.config.hidden_size).cuda()
+            self.config.hidden_size).to(device)
         self.summarizer = Summarizer(
             input_size=self.config.hidden_size,
             hidden_size=self.config.hidden_size,
-            num_layers=self.config.num_layers).cuda()
+            num_layers=self.config.num_layers).to(device)
         self.discriminator = Discriminator(
             input_size=self.config.hidden_size,
             hidden_size=self.config.hidden_size,
-            num_layers=self.config.num_layers).cuda()
+            num_layers=self.config.num_layers).to(device)
         self.actor = Actor(
             state_size=self.config.action_state_size,
-            action_size=self.config.action_state_size).cuda()
+            action_size=self.config.action_state_size).to(device)
         self.critic = Critic(
             state_size=self.config.action_state_size,
-            action_size=self.config.action_state_size).cuda()
+            action_size=self.config.action_state_size).to(device)
         self.model = nn.ModuleList([
             self.linear_compress, self.summarizer, self.discriminator, self.actor, self.critic])
 
@@ -94,7 +94,7 @@ class Solver(object):
     criterion = nn.MSELoss()
 
     def AC(self, original_features, seq_len, action_fragments):
-        """ Function that makes the actor's actions, in the training steps where the actor and critic components are not trained"""
+        """Function that makes the actor's actions, in the training steps where the actor and critic components are not trained"""
         scores = self.summarizer.s_lstm(original_features)  # [seq_len, 1]
 
         fragment_scores = np.zeros(self.config.action_state_size)  # [num_fragments, 1]
@@ -104,13 +104,13 @@ class Solver(object):
 
         previous_actions = []  # save all the actions (the selected fragments of each episode)
         reduction_factor = (self.config.action_state_size - self.config.termination_point) / self.config.action_state_size
-        action_scores = (torch.ones(seq_len) * reduction_factor).cuda()
-        action_fragment_scores = (torch.ones(self.config.action_state_size)).cuda()
+        action_scores = (torch.ones(seq_len) * reduction_factor).to(device)
+        action_fragment_scores = (torch.ones(self.config.action_state_size)).to(device)
 
         counter = 0
         for ACstep in range(self.config.termination_point):
 
-            state = torch.FloatTensor(state).cuda()
+            state = torch.FloatTensor(state).to(device)
             # select an action
             dist = self.actor(state)
             action = dist.sample()  # returns a scalar between 0-action_state_size
@@ -176,7 +176,7 @@ class Solver(object):
                     list_action_fragments.append(action_fragments)
     
                     # [seq_len, input_size]
-                    image_features_ = Variable(image_features).cuda()
+                    image_features_ = Variable(image_features).to(device)
                     seq_len = image_features_.shape[0]
     
                     # [seq_len, 1, hidden_size]
@@ -216,7 +216,7 @@ class Solver(object):
                     action_fragments = list_action_fragments[video]
                     
                     # [seq_len, input_size]
-                    image_features_ = Variable(image_features).cuda()
+                    image_features_ = Variable(image_features).to(device)
                     seq_len = image_features_.shape[0]
                     
                     # [seq_len, 1, hidden_size]
@@ -265,7 +265,7 @@ class Solver(object):
                     action_fragments = list_action_fragments[video]
                     
                     # [seq_len, input_size]
-                    image_features_ = Variable(image_features).cuda()
+                    image_features_ = Variable(image_features).to(device)
                     seq_len = image_features_.shape[0]
                     
                     # Train with original loss
@@ -303,7 +303,7 @@ class Solver(object):
                     action_fragments = list_action_fragments[video]
                     
                     # [seq_len, input_size]
-                    image_features_ = Variable(image_features).cuda()
+                    image_features_ = Variable(image_features).to(device)
                     seq_len = image_features_.shape[0]
                     
                     # [seq_len, 1, hidden_size]
@@ -318,8 +318,8 @@ class Solver(object):
     
                     previous_actions = []  # save all the actions (the selected fragments of each step)
                     reduction_factor = (self.config.action_state_size - self.config.termination_point) / self.config.action_state_size
-                    action_scores = (torch.ones(seq_len) * reduction_factor).cuda()
-                    action_fragment_scores = (torch.ones(self.config.action_state_size)).cuda()
+                    action_scores = (torch.ones(seq_len) * reduction_factor).to(device)
+                    action_fragment_scores = (torch.ones(self.config.action_state_size)).to(device)
     
                     log_probs = []
                     values = []
@@ -330,7 +330,7 @@ class Solver(object):
                     counter = 0
                     for ACstep in range(self.config.termination_point):
                         # select an action, get a value for the current state
-                        state = torch.FloatTensor(state).cuda()  # [action_state_size, 1]
+                        state = torch.FloatTensor(state).to(device)  # [action_state_size, 1]
                         dist, value = self.actor(state), self.critic(state)
                         action = dist.sample()  # returns a scalar between 0-action_state_size
     
@@ -465,7 +465,7 @@ class Solver(object):
         for image_features, video_name, action_fragments in tqdm(self.test_loader, desc='Evaluate', ncols=80, leave=False):
             # [seq_len, batch_size=1, input_size)]
             image_features = image_features.view(-1, self.config.input_size)
-            image_features_ = Variable(image_features).cuda()
+            image_features_ = Variable(image_features).to(device)
 
             # [seq_len, 1, hidden_size]
             original_features = self.linear_compress(image_features_.detach()).unsqueeze(1)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import argparse
 from pathlib import Path
 import pprint
@@ -27,10 +28,16 @@ class Config(object):
         self.set_dataset_dir(self.video_type)
 
     def set_dataset_dir(self, video_type='TVSum'):
-        self.log_dir = save_dir.joinpath(video_type, 'logs/split' + str(self.split_index))
-        self.score_dir = save_dir.joinpath(video_type, 'results/split' + str(self.split_index))
-        self.save_dir = save_dir.joinpath(video_type, 'models/split' + str(self.split_index))
-        
+        sigma = f'sigma{self.regularization_factor}'
+        split = f'split{self.split_index}'
+        self.log_dir = save_dir.joinpath(video_type, sigma, 'logs', split)
+        self.score_dir = save_dir.joinpath(video_type, sigma, 'results', split)
+        self.save_dir = save_dir.joinpath(video_type, sigma, 'models', split)
+
+        os.makedirs(self.log_dir, exist_ok=True)
+        os.makedirs(self.score_dir, exist_ok=True)
+        os.makedirs(self.save_dir, exist_ok=True)
+
 def __repr__(self):
         """Pretty-print configurations in alphabetical order"""
         config_str = 'Configurations\n'

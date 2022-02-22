@@ -5,6 +5,8 @@ from torch.autograd import Variable
 
 from layers.lstmcell import StackedLSTMCell
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class sLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers=2):
         """Scoring LSTM"""
@@ -80,7 +82,7 @@ class dLSTM(nn.Module):
         batch_size = init_hidden[0].size(1)
         hidden_size = init_hidden[0].size(2)
 
-        x = Variable(torch.zeros(batch_size, hidden_size)).cuda()
+        x = Variable(torch.zeros(batch_size, hidden_size)).to(device)
         h, c = init_hidden  # (h_0, c_0): last state of eLSTM
 
         out_features = []
@@ -115,7 +117,7 @@ class VAE(nn.Module):
         std = torch.exp(0.5 * log_variance)
 
         # e ~ N(0,1)
-        epsilon = Variable(torch.randn(std.size())).cuda()
+        epsilon = Variable(torch.randn(std.size())).to(device)
 
         # [num_layers, 1, hidden_size]
         return (mu + epsilon * std).unsqueeze(1)

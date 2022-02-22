@@ -1,5 +1,8 @@
-python main.py --split_index 0
-python main.py --split_index 1
-python main.py --split_index 2
-python main.py --split_index 3
-python main.py --split_index 4
+#!/bin/bash
+
+sigma=${1:-0.5}
+echo sigma $sigma
+
+for i in {0..4}; do
+    python main.py --split_index $i --regularization_factor $sigma
+done
