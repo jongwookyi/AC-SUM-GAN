@@ -1,0 +1,3 @@
+[submodule "data/KTS"]
+	path = data/KTS
+	url = https://github.com/jongwookyi/KTS.git
