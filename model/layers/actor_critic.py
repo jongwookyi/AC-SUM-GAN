@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
 
+
 class Actor(nn.Module):
     def __init__(self, state_size, action_size):
         """Actor that picks a fragment for the summary in every iteration"""
@@ -55,5 +56,4 @@ class Critic(nn.Module):
         return value
 
 if __name__ == '__main__':
-
     pass

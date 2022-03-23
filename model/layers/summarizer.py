@@ -3,9 +3,10 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from layers.lstmcell import StackedLSTMCell
+from .lstmcell import StackedLSTMCell
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class sLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers=2):
