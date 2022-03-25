@@ -28,7 +28,9 @@ class Solver(object):
         self.train_loader = train_loader
         self.test_loader = test_loader
 
-    def build(self):
+        self._build()
+
+    def _build(self):
         device = self.config.device
         action_state_size = self.config.action_state_size
 
@@ -79,7 +81,7 @@ class Solver(object):
 
     def load_model_state(self, epoch_i):
         device = self.config.device
-        checkpoint_path = self.config.save_dir / f"epoch-{epoch_i}.pkl"
+        checkpoint_path = self.config.model_dir / f"epoch-{epoch_i}.pkl"
         print("checkpoint file path:", checkpoint_path)
         self.model.load_state_dict(torch.load(checkpoint_path, map_location=device))
         self.model.to(device)
@@ -472,7 +474,7 @@ class Solver(object):
             self.writer.update_loss(reward, epoch_i, "reward_epoch")
 
             # Save parameters at checkpoint
-            checkpoint_path = str(self.config.save_dir / f"epoch-{epoch_i}.pkl")
+            checkpoint_path = str(self.config.model_dir / f"epoch-{epoch_i}.pkl")
             if self.config.verbose:
                 tqdm.write(f"Save parameters at {checkpoint_path}")
             torch.save(self.model.state_dict(), checkpoint_path)

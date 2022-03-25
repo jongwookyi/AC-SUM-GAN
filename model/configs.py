@@ -5,7 +5,10 @@ import pprint
 import math
 import torch
 
-save_dir = Path("../exp1")
+DEVICE_CUDA = "cuda"
+
+_package_path = Path(__file__).parent.absolute()
+_default_save_dir = _package_path / "../exp1"
 
 
 def str2bool(v):
@@ -24,21 +27,25 @@ class Config(object):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-        self.device = torch.device(self.device if torch.cuda.is_available() else "cpu")
+        if self.device.startswith(DEVICE_CUDA) and (not torch.cuda.is_available()):
+            print("CUDA is not available, uses CPU!")
+            self.device = "cpu"
+        self.device = torch.device(self.device)
         self.termination_point = math.floor(0.15 * self.action_state_size)
+        self.save_dir = Path(self.save_dir)
         self.set_dataset_dir(self.video_type)
 
     def set_dataset_dir(self, video_type="TVSum"):
         sigma = f"sigma{self.regularization_factor}"
         split = f"split{self.split_index}"
 
-        self.log_dir = save_dir / video_type / sigma / "logs" / split
-        self.score_dir = save_dir / video_type / sigma / "results" / split
-        self.save_dir = save_dir / video_type / sigma / "models" / split
+        self.log_dir = self.save_dir / video_type / sigma / "logs" / split
+        self.score_dir = self.save_dir / video_type / sigma / "results" / split
+        self.model_dir = self.save_dir / video_type / sigma / "models" / split
 
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.score_dir, exist_ok=True)
-        os.makedirs(self.save_dir, exist_ok=True)
+        os.makedirs(self.model_dir, exist_ok=True)
 
     def __repr__(self):
         """Pretty-print configurations in alphabetical order"""
@@ -66,7 +73,7 @@ def get_config(parse=True, **optional_kwargs):
     parser.add_argument("--input_size", type=int, default=1024)
     parser.add_argument("--hidden_size", type=int, default=512)
     parser.add_argument("--num_layers", type=int, default=2)
-    parser.add_argument("--regularization_factor", type=float, default=0.5)
+    parser.add_argument("--regularization_factor", type=float, default=0.5) # sigma
     parser.add_argument("--entropy_coef", type=float, default=0.1)
 
     # Train
@@ -77,6 +84,8 @@ def get_config(parse=True, **optional_kwargs):
     parser.add_argument("--discriminator_lr", type=float, default=1e-5)
     parser.add_argument("--split_index", type=int, default=0)
     parser.add_argument("--action_state_size", type=int, default=60)
+    parser.add_argument("--save_dir", type=str, default=str(_default_save_dir))
+
 
     if parse:
         kwargs = parser.parse_args()

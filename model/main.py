@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
 
-package_path = Path(__file__).parent.absolute()
-package_search_path = package_path.parent
-sys.path.append(str(package_search_path))
+_package_path = Path(__file__).parent.absolute()
+_package_search_path = _package_path.parent
+sys.path.append(str(_package_search_path))
 
 from model.configs import get_config
 from model.solver import Solver
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     test_loader = get_loader(test_config.mode, test_config.split_index)
     solver = Solver(config, train_loader, test_loader)
 
-    solver.build()
     # evaluates the summaries generated using the initial random weights of the network
     solver.evaluate(-1)
+
     solver.train()

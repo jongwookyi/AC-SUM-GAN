@@ -6,15 +6,15 @@ import time
 import sys
 from pathlib import Path
 
-package_path = Path(__file__).parent.absolute()
-package_search_path = package_path.parent
-sys.path.append(str(package_search_path))
+_package_path = Path(__file__).parent.absolute()
+_package_search_path = _package_path.parent
+sys.path.append(str(_package_search_path))
 
 from data import vsum_tool, SumMeVideo, TVSumVideo, VSUMMVideo
 import torch
 
 
-dataset_dir = package_path / "../../datasets"
+dataset_dir = _package_path / "../../datasets"
 
 # summe_dir = dataset_dir / "SumMe"
 # video = SumMeVideo("Air_Force_One", summe_dir)  # video_1
@@ -39,8 +39,8 @@ print(f"ground_truth_0: {ground_truth_0.shape} {ground_truth_0.min()}~{ground_tr
 # ground_truth = video.ground_truth()
 # print(f"    ground truth: {type(ground_truth)} {ground_truth.dtype} {ground_truth.shape} {ground_truth.min()}~{ground_truth.max()}")
 
-# filePath = package_path / "./SumMe/eccv16_dataset_summe_google_pool5.h5"
-filePath = package_path / "./TVSum/eccv16_dataset_tvsum_google_pool5.h5"
+# filePath = _package_path / "./SumMe/eccv16_dataset_summe_google_pool5.h5"
+filePath = _package_path / "./TVSum/eccv16_dataset_tvsum_google_pool5.h5"
 print(filePath)
 hdf = h5py.File(filePath, "r")
 

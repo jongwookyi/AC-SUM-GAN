@@ -2,9 +2,9 @@ import os
 import sys
 from pathlib import Path
 
-package_path = Path(__file__).parent.absolute()
-package_search_path = package_path.parent
-sys.path.append(str(package_search_path))
+_package_path = Path(__file__).parent.absolute()
+_package_search_path = _package_path.parent
+sys.path.append(str(_package_search_path))
 
 import json
 import numpy as np
@@ -35,7 +35,7 @@ def epochFromFileName(fileName):
 results = os.listdir(results_dir)
 results.sort(key=epochFromFileName)
 
-HOME_PATH = package_path / "../data"
+HOME_PATH = _package_path / "../data"
 DATASET_PATH = HOME_PATH / dataset / f"eccv16_dataset_{dataset.lower()}_google_pool5.h5"
 
 # for each epoch, read the results' file and compute the f_score
