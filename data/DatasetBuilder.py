@@ -25,7 +25,6 @@ class DatasetBuilder:
     def __init__(self, video_path, save_path, save_frames=False,
                  deep_feature_model="googlenet", use_gpu=True):
         save_path = Path(save_path)
-        self.dataset = {}
         self.save_frames = save_frames
         self.frames_dir = save_path.parent / "frames"
         self.h5_file = h5py.File(save_path, "w")
@@ -67,7 +66,6 @@ class DatasetBuilder:
 
         for idx, file_name in enumerate(self.video_list):
             key = f"video_{idx + 1}"
-            self.dataset[key] = {}
             self.h5_file.create_group(key)
 
     def _extract_feature(self, frame):
@@ -129,7 +127,7 @@ class DatasetBuilder:
 
             change_points, n_frame_per_seg = vsum_tool.get_change_points(video_feat, n_frames, fps)
 
-            data = self.dataset[f"video_{video_idx + 1}"]
+            data = self.h5_file[f"video_{video_idx + 1}"]
             data["change_points"] = change_points
             # data["features"] = video_feat
             data["features"] = video_feat_for_train
