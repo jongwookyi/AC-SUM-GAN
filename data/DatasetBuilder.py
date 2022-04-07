@@ -32,7 +32,7 @@ class DatasetBuilder:
         self._device = torch.device("cuda" if use_gpu and torch.cuda.is_available() else "cpu")
         self._set_deep_feature_model(deep_feature_model)
 
-        self._set_video_list(Path(video_path))
+        self._set_video_list(video_path)
 
     def _set_deep_feature_model(self, model_name):
         # alexnet, resnet50, resnet152, googlenet
@@ -57,10 +57,10 @@ class DatasetBuilder:
         ])
 
     def _set_video_list(self, video_path):
+        video_path = Path(video_path)
         self.video_path = video_path
         if video_path.is_dir():
             self.video_list = list(video_path.iterdir())
-            self.video_list.sort()
         else:
             self.video_list = [video_path]
 
@@ -89,9 +89,6 @@ class DatasetBuilder:
             if ".h5" in str(video_filename):
                 continue
 
-            if self.video_path.is_dir():
-                video_path = self.video_path / video_filename
-
             if self.save_frames:
                 frames_dir = self.frames_dir / video_path.stem
                 os.makedirs(frames_dir, exist_ok=True)
@@ -100,7 +97,7 @@ class DatasetBuilder:
 
             fps = video_capture.get(cv2.CAP_PROP_FPS)
             n_frames = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
-
+ 
             decimation_factor = 15
             picks = []
             video_feat = []
