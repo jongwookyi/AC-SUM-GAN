@@ -84,9 +84,8 @@ class DatasetBuilder:
             return features
 
     def build(self):
-        for video_idx, video_filename in enumerate(tqdm(self.video_list)):
-            video_path = video_filename
-            if ".h5" in str(video_filename):
+        for video_idx, video_path in enumerate(tqdm(self.video_list)):
+            if video_path.suffix.lower() == ".h5":
                 continue
 
             if self.save_frames:
@@ -132,7 +131,7 @@ class DatasetBuilder:
             data["n_frame_per_seg"] = n_frame_per_seg
             data["n_frames"] = n_frames
             data["picks"] = picks
-            data["video_name"] = video_filename.stem
+            data["video_name"] = video_path.stem
 
     def close(self):
         self.h5_file.close()
