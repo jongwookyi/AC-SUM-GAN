@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 from .lstmcell import StackedLSTMCell
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class sLSTM(nn.Module):
@@ -83,7 +83,7 @@ class dLSTM(nn.Module):
         batch_size = init_hidden[0].size(1)
         hidden_size = init_hidden[0].size(2)
 
-        x = Variable(torch.zeros(batch_size, hidden_size)).to(device)
+        x = Variable(torch.zeros(batch_size, hidden_size)).to(_device)
         h, c = init_hidden  # (h_0, c_0): last state of eLSTM
 
         out_features = []
@@ -118,7 +118,7 @@ class VAE(nn.Module):
         std = torch.exp(0.5 * log_variance)
 
         # e ~ N(0,1)
-        epsilon = Variable(torch.randn(std.size())).to(device)
+        epsilon = Variable(torch.randn(std.size())).to(_device)
 
         # [num_layers, 1, hidden_size]
         return (mu + epsilon * std).unsqueeze(1)
@@ -161,6 +161,11 @@ class Summarizer(nn.Module):
         super().__init__()
         self.s_lstm = sLSTM(input_size, hidden_size, num_layers)
         self.vae = VAE(input_size, hidden_size, num_layers)
+
+    def to(self, device):
+        global _device
+        _device = device
+        return super().to(device)
 
     def forward(self, image_features):
         """
