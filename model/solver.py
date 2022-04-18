@@ -189,9 +189,8 @@ class Solver(object):
                 self.e_optimizer.zero_grad()
                 for video in range(self.config.batch_size):
                     image_features, _ = next(iterator)
+                    action_fragments = compute_fragments(image_features.shape[1], action_state_size)
 
-                    action_fragments = compute_fragments(image_features.shape[0], action_state_size)
-                    action_fragments = action_fragments.squeeze(0)
                     # [batch_size, seq_len, input_size]
                     # [seq_len, input_size]
                     image_features = image_features.view(-1, self.config.input_size)
