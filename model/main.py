@@ -14,8 +14,8 @@ if __name__ == "__main__":
     config = get_config(mode="train")
     test_config = get_config(mode="test")
 
-    print(config)
-    print(test_config)
+    print("train config:", config)
+    print("test config:", test_config)
 
     train_loader = get_loader(config.mode, config.split_index)
     test_loader = get_loader(test_config.mode, test_config.split_index)
