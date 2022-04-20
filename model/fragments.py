@@ -41,10 +41,19 @@ def compute_fragments(seq_len, action_state_size):
     # "action_fragments" contains the starting and ending frame of each action fragment
     frag_jump = calculate_fragments(seq_len, action_state_size)
     action_fragments = np.zeros((action_state_size, 2), dtype=int)
-    for i in range(action_state_size - 1):
-        action_fragments[i, 1] = frag_jump[0:i + 1].sum() - 1
-        action_fragments[i + 1, 0] = frag_jump[0:i + 1].sum()
-    action_fragments[action_state_size - 1, 1] = frag_jump[0:action_state_size].sum() - 1
+    frag_end, frag_next_begin = 0, 0
+    max_frag_i = seq_len - 1
+    max_i = action_fragments.shape[0] - 1
+    for i, jump in enumerate(frag_jump):
+        frag_next_begin += jump
+        frag_end = frag_next_begin - int(0 < jump)
+
+        frag_end = min(frag_end, max_frag_i)
+        action_fragments[i, 1] = frag_end
+        if i == max_i:
+            break
+        frag_next_begin = min(frag_next_begin, max_frag_i)
+        action_fragments[i + 1, 0] = frag_next_begin
 
     return action_fragments
 
