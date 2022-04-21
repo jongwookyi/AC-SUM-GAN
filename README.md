@@ -54,7 +54,7 @@ Setup for the training process:
     
 Arguments in ['configs.py'](https://github.com/e-apostolidis/AC-SUM-GAN/blob/main/model/configs.py): 
 <pre>
---video_type: The used dataset for training the model. Can be either 'TVSum' or 'SumMe'.
+--dataset: The used dataset for training the model. Can be either 'TVSum' or 'SumMe'.
 --input_size: The size of the input feature vectors (1024 for GoogLeNet features).
 --hidden_size: The hidden size of the LSTM units.
 --num_layers: The number of layers of each LSTM network.

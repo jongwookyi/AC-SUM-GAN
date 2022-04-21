@@ -17,8 +17,8 @@ if __name__ == "__main__":
     print("train config:", config)
     print("test config:", test_config)
 
-    train_loader = get_loader(config.mode, config.split_index)
-    test_loader = get_loader(test_config.mode, test_config.split_index)
+    train_loader = get_loader(config)
+    test_loader = get_loader(test_config)
     solver = Solver(config, train_loader, test_loader)
 
     # evaluates the summaries generated using the initial random weights of the network

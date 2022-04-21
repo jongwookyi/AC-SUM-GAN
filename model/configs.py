@@ -5,10 +5,16 @@ import pprint
 import math
 import torch
 
-DEVICE_CUDA = "cuda"
-
 _package_path = Path(__file__).parent.absolute()
-_default_save_dir = _package_path / "../exp1"
+
+DEVICE_CUDA = "cuda"
+DEVICE_CPU = "cpu"
+
+_default_dataset = "TVSum"
+_dataset_dir = (_package_path / "../data").resolve()
+_default_dataset_path = _dataset_dir / _default_dataset / f"eccv16_dataset_{_default_dataset.lower()}_google_pool5.h5"
+_default_splits_path = _dataset_dir / "splits" / f"{_default_dataset.lower()}_splits.json"
+_default_save_dir = (_package_path / "../exp1").resolve()
 
 
 def str2bool(v):
@@ -29,19 +35,21 @@ class Config(object):
 
         if self.device.startswith(DEVICE_CUDA) and (not torch.cuda.is_available()):
             print("CUDA is not available, uses CPU!")
-            self.device = "cpu"
+            self.device = DEVICE_CPU
         self.device = torch.device(self.device)
         self.termination_point = math.floor(0.15 * self.action_state_size)
         self.save_dir = Path(self.save_dir)
-        self.set_dataset_dir(self.video_type)
+        self.set_dataset_dir(self.dataset)
 
-    def set_dataset_dir(self, video_type="TVSum"):
+    def set_dataset_dir(self, dataset):
         sigma = f"sigma{self.regularization_factor}"
         split = f"split{self.split_index}"
 
-        self.log_dir = self.save_dir / video_type / sigma / "logs" / split
-        self.score_dir = self.save_dir / video_type / sigma / "results" / split
-        self.model_dir = self.save_dir / video_type / sigma / "models" / split
+        save_dir = self.save_dir / dataset / sigma
+
+        self.log_dir = save_dir / "logs" / split
+        self.score_dir = save_dir / "results" / split
+        self.model_dir = save_dir / "models" / split
 
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.score_dir, exist_ok=True)
@@ -61,31 +69,32 @@ def get_config(parse=True, **optional_kwargs):
     2. Create Config class initialized with parsed kwargs.
     3. Return Config class.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Mode
-    parser.add_argument("--mode", type=str, default="train")
-    parser.add_argument("--device", type=str, default="cuda")
-    parser.add_argument("--verbose", type=str2bool, default="true")
-    parser.add_argument("--video_type", type=str, default="TVSum")
+    parser.add_argument("--mode", type=str, default="train", help="running mode")
+    parser.add_argument("--device", type=str, default=DEVICE_CUDA, help="torch device")
+    parser.add_argument("--verbose", type=str2bool, default="true", help="show verbose logs")
+    parser.add_argument("--dataset", type=str, default=_default_dataset, help="name of dataset")
+    parser.add_argument("--dataset_path", type=str, default=str(_default_dataset_path), help="dataset file path")
+    parser.add_argument("--splits_path", type=str, default=str(_default_splits_path), help="splits file path")
 
     # Model
-    parser.add_argument("--input_size", type=int, default=1024)
-    parser.add_argument("--hidden_size", type=int, default=512)
-    parser.add_argument("--num_layers", type=int, default=2)
-    parser.add_argument("--regularization_factor", type=float, default=0.5) # sigma
-    parser.add_argument("--entropy_coef", type=float, default=0.1)
+    parser.add_argument("--input_size", type=int, default=1024, help="input size")
+    parser.add_argument("--hidden_size", type=int, default=512, help="hidden size")
+    parser.add_argument("--num_layers", type=int, default=2, help="number of layers")
+    parser.add_argument("--regularization_factor", type=float, default=0.5, help="sigma")
+    parser.add_argument("--entropy_coef", type=float, default=0.1, help="entropy coefficient")
 
     # Train
-    parser.add_argument("--n_epochs", type=int, default=100)
-    parser.add_argument("--batch_size", type=int, default=40)
-    parser.add_argument("--clip", type=float, default=5.0)
-    parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--discriminator_lr", type=float, default=1e-5)
-    parser.add_argument("--split_index", type=int, default=0)
-    parser.add_argument("--action_state_size", type=int, default=60)
-    parser.add_argument("--save_dir", type=str, default=str(_default_save_dir))
-
+    parser.add_argument("--n_epochs", type=int, default=100, help="number of epochs")
+    parser.add_argument("--batch_size", type=int, default=40, help="batch size")
+    parser.add_argument("--clip", type=float, default=5.0, help="clip")
+    parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")
+    parser.add_argument("--discriminator_lr", type=float, default=1e-5, help="discriminator learning rate")
+    parser.add_argument("--split_index", type=int, default=0, help="split index")
+    parser.add_argument("--action_state_size", type=int, default=60, help="action state size")
+    parser.add_argument("--save_dir", type=str, default=str(_default_save_dir), help="save dir")
 
     if parse:
         kwargs = parser.parse_args()

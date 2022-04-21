@@ -142,7 +142,7 @@ print(f"config: mode={config.mode}, sigma={config.regularization_factor},",
       f"split_index={config.split_index}, action_state_size={config.action_state_size}")
 
 train_loader = None
-test_loader = get_loader(config.mode, config.split_index)
+test_loader = get_loader(config)
 solver = Solver(config, train_loader, test_loader)
 solver.load_model_state(epoch)
 print("model loaded!")

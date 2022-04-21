@@ -515,28 +515,10 @@ class Solver(object):
             if self.config.verbose:
                 tqdm.write(f"Predicting scores of {video_name} ...")
 
-            # action_state_size = self.config.action_state_size
-            # action_fragments = compute_fragments(image_features.shape[0], action_state_size)
-
-            # # [seq_len, batch_size=1, input_size)]
-            # image_features = image_features.view(-1, self.config.input_size)
-            # image_features_ = Variable(image_features).to(device)
-
-            # # [seq_len, 1, hidden_size]
-            # original_features = self.linear_compress(image_features_.detach()).unsqueeze(1)
-            # seq_len = original_features.shape[0]
-
-            # with torch.no_grad():
-            #     _, scores = self.AC(original_features, seq_len, action_fragments)
-
-            #     scores = scores.squeeze(1)
-            #     scores = scores.cpu().detach().numpy().tolist()
-
-            #     out_dict[video_name] = scores
             scores = self.predict(image_features)
             out_dict[video_name] = scores.tolist()
 
-            score_save_path = self.config.score_dir / f"{self.config.video_type}_{epoch_i}.json"
+            score_save_path = self.config.score_dir / f"{self.config.dataset}_{epoch_i}.json"
             with open(score_save_path, "w") as f:
                 if self.config.verbose:
                     tqdm.write(f"Saving score at {str(score_save_path)}.")

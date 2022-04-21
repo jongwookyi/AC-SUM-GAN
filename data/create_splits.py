@@ -59,12 +59,13 @@ def create(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Code to create splits in json form")
+    parser = argparse.ArgumentParser(description="Code to create splits in json form",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("dataset", type=str, help="path to h5 dataset")
-    parser.add_argument("--splits-dir", type=str, default='./splits', help="path to save output json file (default: './splits')")
-    parser.add_argument("--file-name", type=str, default="splits", help="name to save as, excluding extension (default: 'splits')")
-    parser.add_argument("--num-splits", type=int, default=5, help="how many splits to generate (default: 5)")
-    parser.add_argument("--split-ratio", type=float, default=0.8, help="percentage of training data (default: 0.8)")
+    parser.add_argument("--splits-dir", type=str, default='./splits', help="path to save output json file")
+    parser.add_argument("--file-name", type=str, default="splits", help="name to save as, excluding extension")
+    parser.add_argument("--num-splits", type=int, default=5, help="how many splits to generate")
+    parser.add_argument("--split-ratio", type=float, default=0.8, help="ratio of training data")
     args = parser.parse_args()
 
     create(args)
